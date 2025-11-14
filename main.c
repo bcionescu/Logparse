@@ -8,9 +8,19 @@ FILE *read_file(const char *path) {
     return fopen(path, "r");
 }
 
-int is_file_empty(struct stat st) {
+void is_file_empty(struct stat st) {
     if (st.st_size == 0) {
 	printf("The file provided is empty.\n");
+	exit(EXIT_FAILURE);
+    }
+}
+
+void compile_regex(regex_t *pattern, const char *regex, int regex_flags) {
+    int ret = regcomp(pattern, regex, regex_flags);
+    if (ret) {
+    char errbuf[128];
+	regerror(ret, pattern, errbuf, sizeof(errbuf));
+	fprintf(stderr, "Could not compile regex: %s\n", errbuf);
 	exit(EXIT_FAILURE);
     }
 }
@@ -85,13 +95,7 @@ int main(int argc, char *argv[]) {
 	regex_flags |= REG_ICASE;
     }
 
-    int ret = regcomp(&pattern, regex, regex_flags);
-    if (ret) {
-    char errbuf[128];
-	regerror(ret, &pattern, errbuf, sizeof(errbuf));
-	fprintf(stderr, "Could not compile regex: %s\n", errbuf);
-	return 1;
-    }
+    compile_regex(&pattern, regex, regex_flags);
 
     // Read the file line by line
     char line[1024];
