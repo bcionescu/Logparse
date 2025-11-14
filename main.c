@@ -1,16 +1,51 @@
 #include <stdio.h>
 #include <sys/stat.h>
+#include <string.h>
 
 int main(int argc, char *argv[]) {
 
     // Take path to log file as argument, as well as something to look for.
-	
-   if (argc < 2) {
-	fprintf(stderr, "Usage: %s <path-to-log>\n", argv[0]);
+    int flag_i = 0, flag_n = 0, flag_a = 0;
+    const char *regex = NULL;
+    const char *path = NULL;
+
+    int i = 1;
+    for (; i < argc; i++) {
+	if (argv[i][0] == '-') {
+	    if (argv[i][1] == '\0') {
+		break;
+	    }
+
+	    for (int j = 1; argv[i][j] != '\0'; j++) {
+		switch (argv[i][j]) {
+		    case 'i': flag_i = 1; break;
+		    case 'n': flag_n = 1; break;
+		    case 'a': flag_a = 1; break;
+		    default:
+			fprintf(stderr, "Unknown option: %c\n", argv[i][j]);
+			return 1;
+		}
+	    }
+	} else {
+	    break;
+	}
+    }
+
+    if (i < argc - 1) {
+	regex = argv[i++];
+    }
+
+    if (i < argc) {
+	path = argv[i];
+    }
+
+    if (!path) {
+	fprintf(stderr, "Usage: %s [-i] [-n] [-a] [regex] <path-to-log>\n", argv[0]);
 	return 1;
     }
 
-    const char *path = argv[1];
+    // Check that the file exists.
+
     struct stat st;
     
     if (stat(path, &st) != 0) {
@@ -24,10 +59,14 @@ int main(int argc, char *argv[]) {
 	return 1;
     }
 
-    printf("Path provided: %s\n", path);
+    printf("Flags: -i=%d -n=%d -a=%d\n", flag_i, flag_n, flag_a);
+    printf("Regex: %s\n", regex ? regex : "(none)");
+    printf("Path: %s\n", path);
 
-    // Check that the file exists, and that it is not empty.
-	
+    // Read the file
+
+    // Ensure the file is not empty.
+
     // Check that the regex compiles properly, and in a reasonable amount of time.
 
     // Check that the file is readable, and does not contain any null bytes, causing
