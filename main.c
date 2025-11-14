@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <regex.h>
 
 int main(int argc, char *argv[]) {
 
@@ -45,7 +46,6 @@ int main(int argc, char *argv[]) {
     }
 
     // Check that the file exists.
-
     struct stat st;
     
     if (stat(path, &st) != 0) {
@@ -59,33 +59,61 @@ int main(int argc, char *argv[]) {
 	return 1;
     }
 
+    // Open the file
+    FILE *file;
+    file = fopen(path, "r");
+
+    char *empty = "";
+
+    // Check if the file is empty
+    if (st.st_size == 0) {
+	empty = "empty";
+    } else {
+	empty = "not empty";
+    }
+
+    // Compile the regex
+    regex_t pattern;
+    int regex_flags = REG_EXTENDED;
+
+    if (flag_i) {
+	regex_flags |= REG_ICASE;
+    }
+
+    int ret = regcomp(&pattern, regex, regex_flags);
+    if (ret) {
+    char errbuf[128];
+	regerror(ret, &pattern, errbuf, sizeof(errbuf));
+	fprintf(stderr, "Could not compile regex: %s\n", errbuf);
+	return 1;
+    }
+
+    // Read the file line by line
+    char line[1024];
+    int matches_count = 0;
+    while (fgets(line, sizeof(line), file) != NULL ) {
+	if (regexec(&pattern, line, 0, NULL, 0) == 0) {
+	    printf("%s", line);
+	    matches_count++;
+	}
+    }
+
+    regfree(&pattern);
+
     printf("Flags: -i=%d -n=%d -a=%d\n", flag_i, flag_n, flag_a);
     printf("Regex: %s\n", regex ? regex : "(none)");
     printf("Path: %s\n", path);
-
-    // Read the file
-
-    // Ensure the file is not empty.
-
-    // Check that the regex compiles properly, and in a reasonable amount of time.
+    printf("Matches: %d\n", matches_count);
+    printf("The file has been read and is %s.", empty);
 
     // Check that the file is readable, and does not contain any null bytes, causing
     // portions of the file be silently skipped.
 
     // Logs are usually in UTF-8, but not always. This might need to be addressed?
 
-    // Read the contents of the file.
-
-    // Go through it line by line, and use regex to look for requested data.
-
     // Show the relevant lines, using ANSII to color the matches, if the flag was provided.
 
     // Display extra information, such as the number of occurences.
-
-    // Take extra arguments:
-    // -i for case insensitivity
-    // -n to display the line number for each matching line
-    // -a to enable ANSII, as some users may prefer to not have it by default
 
     return 0;
 
