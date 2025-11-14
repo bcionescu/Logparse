@@ -3,6 +3,10 @@
 #include <string.h>
 #include <regex.h>
 
+FILE *read_file(const char *path) {
+    return fopen(path, "r");
+}
+
 int main(int argc, char *argv[]) {
 
     // Take path to log file as argument, as well as something to look for.
@@ -59,17 +63,11 @@ int main(int argc, char *argv[]) {
 	return 1;
     }
 
-    // Open the file
-    FILE *file;
-    file = fopen(path, "r");
+    FILE *file = read_file(path);
 
-    char *empty = "";
-
-    // Check if the file is empty
     if (st.st_size == 0) {
-	empty = "empty";
-    } else {
-	empty = "not empty";
+	printf("The file provided is empty.");
+	return 1;
     }
 
     // Compile the regex
@@ -117,22 +115,18 @@ int main(int argc, char *argv[]) {
 	}
     }
 
+    fclose(file);
     regfree(&pattern);
 
     printf("Flags: -i=%d -n=%d -a=%d\n", flag_i, flag_n, flag_a);
     printf("Regex: %s\n", regex ? regex : "(none)");
     printf("Path: %s\n", path);
     printf("Matches: %d\n", matches_count);
-    printf("The file has been read and is %s.", empty);
 
     // Check that the file is readable, and does not contain any null bytes, causing
     // portions of the file be silently skipped.
 
     // Logs are usually in UTF-8, but not always. This might need to be addressed?
-
-    // Show the relevant lines, using ANSII to color the matches, if the flag was provided.
-
-    // Display extra information, such as the number of occurences.
 
     return 0;
 
