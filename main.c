@@ -25,6 +25,17 @@ void compile_regex(regex_t *pattern, const char *regex, int regex_flags) {
     }
 }
 
+int determine_case(int flag_i) {
+    
+    int regex_flags = REG_EXTENDED;
+
+    if (flag_i) {
+	regex_flags |= REG_ICASE;
+    }
+    
+    return regex_flags;
+}
+
 int main(int argc, char *argv[]) {
 
     // Take path to log file as argument, as well as something to look for.
@@ -85,15 +96,10 @@ int main(int argc, char *argv[]) {
 
     is_file_empty(st);
 
-    // Compile the regex
     regex_t pattern;
     regmatch_t match;
 
-    int regex_flags = REG_EXTENDED;
-
-    if (flag_i) {
-	regex_flags |= REG_ICASE;
-    }
+    int regex_flags = determine_case(flag_i);
 
     compile_regex(&pattern, regex, regex_flags);
 
