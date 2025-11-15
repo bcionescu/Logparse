@@ -4,6 +4,8 @@
 #include <regex.h>
 #include <stdlib.h>
 
+void check_if_file_exists(const char *path, struct stat *st);
+void is_file_valid(const char *path, struct stat *st);
 FILE *read_file(const char *path);
 void is_file_empty(struct stat st);
 void compile_regex(regex_t *pattern, const char *regex, int regex_flags);
@@ -55,17 +57,10 @@ int main(int argc, char *argv[]) {
     }
 
     struct stat st;
-    
-    if (stat(path, &st) != 0) {
-	perror("stat");
-	fprintf(stderr, "Error: cannot access file: %s\n", path);
-	return 1;
-    }
 
-    if (!S_ISREG(st.st_mode)) {
-	fprintf(stderr, "Error: path is not a regular file: %s\n", path);
-	return 1;
-    }
+    check_if_file_exists(path, &st);
+
+    is_file_valid(path, &st);
 
     FILE *file = read_file(path);
 
@@ -112,6 +107,21 @@ int main(int argc, char *argv[]) {
     check_debugging_flag(flag_i, flag_n, flag_a, flag_m, path, flag_d, regex);
 
     return 0;
+}
+
+void check_if_file_exists(const char *path, struct stat *st) {
+    if (stat(path, st) != 0) {
+	perror("stat");
+	fprintf(stderr, "Error: cannot access file: %s\n", path);
+	exit(EXIT_FAILURE);
+    }
+}
+
+void is_file_valid(const char *path, struct stat *st) {
+    if (!S_ISREG(st -> st_mode)) {
+	fprintf(stderr, "Error: path is not a regular file: %s\n", path);
+	exit(EXIT_FAILURE);
+    }
 }
 
 FILE *read_file(const char *path) {
