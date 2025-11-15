@@ -38,7 +38,6 @@ int determine_case(int flag_i) {
 
 int main(int argc, char *argv[]) {
 
-    // Take path to log file as argument, as well as something to look for.
     int flag_i = 0, flag_n = 0, flag_a = 0, flag_m = 0, flag_d = 0;
     const char *regex = NULL;
     const char *path = NULL;
@@ -80,7 +79,6 @@ int main(int argc, char *argv[]) {
 	return 1;
     }
 
-    // Check that the file exists.
     struct stat st;
     
     if (stat(path, &st) != 0) {
@@ -105,7 +103,6 @@ int main(int argc, char *argv[]) {
 
     compile_regex(&pattern, regex, regex_flags);
 
-    // Read the file line by line
     char line[1024];
     int matches_count = 0;
     int line_number = 0;
@@ -146,11 +143,5 @@ int main(int argc, char *argv[]) {
 	printf("Path: %s\n", path);
     }
 
-    // Check that the file is readable, and does not contain any null bytes, causing
-    // portions of the file be silently skipped.
-
-    // Logs are usually in UTF-8, but not always. This might need to be addressed?
-
     return 0;
-
 }
