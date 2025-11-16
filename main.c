@@ -20,6 +20,9 @@ int main(int argc, char *argv[]) {
     const char *regex = NULL;
     const char *path = NULL;
 
+    struct stat st;
+    regex_t pattern;
+
     int i = 1;
     for (; i < argc; i++) {
 	if (argv[i][0] == '-') {
@@ -57,8 +60,6 @@ int main(int argc, char *argv[]) {
 	return 1;
     }
 
-    struct stat st;
-
     check_if_file_exists(path, &st);
 
     is_file_valid(path, &st);
@@ -68,8 +69,6 @@ int main(int argc, char *argv[]) {
     is_file_empty(st);
 
     int regex_flags = determine_case(flag_i);
-
-    regex_t pattern;
 
     compile_regex(&pattern, regex, regex_flags);
 
