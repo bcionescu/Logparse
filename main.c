@@ -10,6 +10,7 @@ FILE *read_file(const char *path);
 void is_file_empty(struct stat st);
 void compile_regex(regex_t *pattern, const char *regex, int regex_flags);
 int determine_case(int flag_i);
+int print_matches(FILE *file, regex_t *pattern, int flag_a, int flag_n);
 void check_matches_flag(int flag_m, int matches_count, const char *regex);
 void check_debugging_flag(int flag_i, int flag_n, int flag_a, int flag_m, const char *path, int flag_d, const char *regex);
 
@@ -66,41 +67,13 @@ int main(int argc, char *argv[]) {
 
     is_file_empty(st);
 
-    regex_t pattern;
-    regmatch_t match;
-
     int regex_flags = determine_case(flag_i);
+
+    regex_t pattern;
 
     compile_regex(&pattern, regex, regex_flags);
 
-    char line[1024];
-    int matches_count = 0;
-    int line_number = 0;
-
-    while (fgets(line, sizeof(line), file) != NULL ) {
-	line_number++;
-
-	if (regexec(&pattern, line, 1, &match, 0) == 0) {
-	    if (flag_a) {
-		if (flag_n) printf("%d:", line_number);
-
-		fwrite(line, 1, match.rm_so, stdout);
-
-		printf("\x1b[31m");
-		fwrite(line + match.rm_so, 1, match.rm_eo - match.rm_so, stdout);
-		printf("\x1b[0m");
-
-		printf("%s", line + match.rm_eo);
-	    } else {
-		if (flag_n) printf("%d:", line_number);
-		printf("%s", line);
-		}
-	matches_count++;
-	}
-    }
-
-    fclose(file);
-    regfree(&pattern);
+    int matches_count = print_matches(file, &pattern, flag_a, flag_n);
 
     check_matches_flag(flag_m, matches_count, regex);
 
@@ -154,6 +127,42 @@ int determine_case(int flag_i) {
     }
     
     return regex_flags;
+}
+
+int print_matches(FILE *file, regex_t *pattern, int flag_a, int flag_n) {
+
+    char line[1024];
+    int matches_count = 0;
+    int line_number = 0;
+    regmatch_t match[1];
+
+    while (fgets(line, sizeof(line), file) != NULL ) {
+	line_number++;
+
+	if (regexec(pattern, line, 1, match, 0) == 0) {
+
+	    if (flag_a) {
+		if (flag_n) printf("%d:", line_number);
+
+                fwrite(line, 1, match[0].rm_so, stdout);
+
+		printf("\x1b[31m");
+		fwrite(line + match[0].rm_so, 1, match[0].rm_eo - match[0].rm_so, stdout);
+		printf("\x1b[0m");
+
+		printf("%s", line + match[0].rm_eo);
+	    } else {
+		if (flag_n) printf("%d:", line_number);
+		printf("%s", line);
+		}
+	matches_count++;
+	}
+    }
+
+    fclose(file);
+    regfree(pattern);
+
+    return matches_count;
 }
 
 void check_matches_flag(int flag_m, int matches_count, const char *regex) {
