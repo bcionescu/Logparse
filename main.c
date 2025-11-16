@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!path || !regex) {
-	fprintf(stderr, "Usage: %s [-i] [-n] [-a] [-m] [-d] [regex] <path-to-log>\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-i] [-n] [-a] [-m] [-d] <regex> <path-to-log>\n", argv[0]);
 	return 1;
     }
 

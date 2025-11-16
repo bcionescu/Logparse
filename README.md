@@ -16,7 +16,20 @@ To-Do:
 - [x] If -n is provided, display the line number for each match.
 - [x] If -m is provided, display the total number of matches found in the file.
 - [x] If -d is provided, display information useful for debugging, such as which flags were provided, what the regex is, and what the file path is.
+- [ ] Have the code handle multiple matches per line, not just the first.
 - [ ] Check if the file contains any null bytes, as that would cause portions of the log file to be silently skipped.
-- [ ] Logs are usually in UTF-8. Think about whether this will cause any problems.
 - [ ] Come up with a bunch of test scenarios, and document them.
 - [ ] Write documentation for the program in this GitHub repo.
+
+## Logic
+
+Let's first talk about the logic behind the code, how the parser works, and then we can dive deep into the code, and see how it all works.
+
+Loggy takes a few arguments, some optional, and others not. At the very least, loggy expects a regular expression, and the path to a file. Here is an example.
+
+`bash
+
+
+## Explanation
+
+## Testing
