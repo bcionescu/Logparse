@@ -16,12 +16,12 @@ I'm actively building out and improving the project as I learn C, so please don'
 - [x] If -n is provided, display the line number for each match.
 - [x] If -m is provided, display the total number of matches found in the file.
 - [x] If -d is provided, display information useful for debugging, such as which flags were provided, what the regex is, and what the file path is.
+- [x] Come up with a bunch of test scenarios and document them.
+- [x] Write documentation for the program in this GitHub repo.
 - [ ] Handle an edge case in which the first element of the regex is a hyphen, as that would not work with the current logic.
 - [ ] Have the code handle multiple matches per line, not just the first.
 - [ ] Modify the debugging function to reflect the fact that the regex pattern is mandatory.
 - [ ] Check if the file contains any null bytes, as that would cause portions of the log file to be silently skipped.
-- [ ] Come up with a bunch of test scenarios and document them.
-- [ ] Write documentation for the program in this GitHub repo.
 
 ## Logic
 
