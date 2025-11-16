@@ -8,8 +8,8 @@ void check_if_file_exists(const char *path, struct stat *st);
 void is_file_valid(const char *path, struct stat *st);
 FILE *read_file(const char *path);
 void is_file_empty(struct stat *st);
-void compile_regex(regex_t *pattern, const char *regex, int regex_flags);
 int determine_case(int flag_i);
+void compile_regex(regex_t *pattern, const char *regex, int regex_flags);
 int print_matches(FILE *file, regex_t *pattern, int flag_a, int flag_n);
 void check_matches_flag(int flag_m, int matches_count, const char *regex);
 void check_debugging_flag(int flag_i, int flag_n, int flag_a, int flag_m, const char *path, int flag_d, const char *regex);
@@ -107,16 +107,6 @@ void is_file_empty(struct stat *st) {
     }
 }
 
-void compile_regex(regex_t *pattern, const char *regex, int regex_flags) {
-    int ret = regcomp(pattern, regex, regex_flags);
-    if (ret) {
-    char errbuf[128];
-	regerror(ret, pattern, errbuf, sizeof(errbuf));
-	fprintf(stderr, "Could not compile regex: %s\n", errbuf);
-	exit(EXIT_FAILURE);
-    }
-}
-
 int determine_case(int flag_i) {
     
     int regex_flags = REG_EXTENDED;
@@ -126,6 +116,16 @@ int determine_case(int flag_i) {
     }
     
     return regex_flags;
+}
+
+void compile_regex(regex_t *pattern, const char *regex, int regex_flags) {
+    int ret = regcomp(pattern, regex, regex_flags);
+    if (ret) {
+    char errbuf[128];
+	regerror(ret, pattern, errbuf, sizeof(errbuf));
+	fprintf(stderr, "Could not compile regex: %s\n", errbuf);
+	exit(EXIT_FAILURE);
+    }
 }
 
 int print_matches(FILE *file, regex_t *pattern, int flag_a, int flag_n) {
