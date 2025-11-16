@@ -7,7 +7,7 @@
 void check_if_file_exists(const char *path, struct stat *st);
 void is_file_valid(const char *path, struct stat *st);
 FILE *read_file(const char *path);
-void is_file_empty(struct stat st);
+void is_file_empty(struct stat &st);
 void compile_regex(regex_t *pattern, const char *regex, int regex_flags);
 int determine_case(int flag_i);
 int print_matches(FILE *file, regex_t *pattern, int flag_a, int flag_n);
@@ -100,8 +100,8 @@ FILE *read_file(const char *path) {
     return fopen(path, "r");
 }
 
-void is_file_empty(struct stat st) {
-    if (st.st_size == 0) {
+void is_file_empty(struct stat *st) {
+    if (st->st_size == 0) {
 	printf("The file provided is empty.\n");
 	exit(EXIT_FAILURE);
     }
