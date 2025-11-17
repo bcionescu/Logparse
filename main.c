@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 
     int i = 1;
     for (; i < argc; i++) {
-	if (argv[i][0] == '-') {
+	if ((argv[i][0] == '-') && (argv[i] != argv[argc - 2])) {
 	    if (argv[i][1] == '\0') {
 		break;
 	    }
