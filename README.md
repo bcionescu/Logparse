@@ -18,7 +18,7 @@ I'm actively building out and improving the project as I learn C, so please don'
 - [x] If -d is provided, display information useful for debugging, such as which flags were provided, what the regex is, and what the file path is.
 - [x] Come up with a bunch of test scenarios and document them.
 - [x] Write documentation for the program in this GitHub repo.
-- [ ] Handle an edge case in which the first element of the regex is a hyphen, as that would not work with the current logic.
+- [x] Handle an edge case in which the first element of the regex is a hyphen, as that would not work with the current logic.
 - [ ] Have the code handle multiple matches per line, not just the first.
 - [ ] Modify the debugging function to reflect the fact that the regex pattern is mandatory.
 - [ ] Check if the file contains any null bytes, as that would cause portions of the log file to be silently skipped.
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 
     int i = 1;
     for (; i < argc; i++) {
-	if (argv[i][0] == '-') {
+	if ((argv[i][0] == '-') && (argv[i] != argv[argc - 2])) {
 	    if (argv[i][1] == '\0') {
 		break;
 	    }
@@ -138,10 +138,12 @@ int i = 1;
 for (; i < argc; i++) {
 ```
 
-When we look at `argv[1][0]`, we're looking at the first element of what could be the flags provided. If it's a `-`, it means that we might get some flags. If not, it means that the flags were not provided, and so we can break out of the `if` statement and continue iterating through `argv`.
+When we look at `argv[i][0]`, we're looking at the first element of what could be the flags provided. If it's a `-`, it means that we might get some flags. If not, it means that the flags were not provided, and so we can break out of the `if` statement and continue iterating through `argv`.
+
+The `if` statement now also checks to see if the current position is also not the third to last, as that would be where the regular expression should go. This has been added as initially, providing a regex that started with `-`, such as `-.-` broke the logic, as the program thought it might be anoter flag.
 
 ```c
-if (argv[i][0] == '-') {
+if ((argv[i][0] == '-') && (argv[i] != argv[argc - 2])) {
 ```
 
 `if (argv[i][1] == '\0')` also handles an edge case where a hyphen is provided, but then nothing follows it. The program will find a null byte, realise that this is the end of the string, and then break, moving on to the next element of `argv`.
@@ -190,8 +192,6 @@ If we look at the `argv` array, it will contain the following values:
 `argv[4]` = `NULL`
 
 So we have four elements, we start at `argv[1]`, and we iterate through the flags. Given that we have five elements (including the null byte terminator), the `for` loop will stop after the third element, which will be skipped, as it does not start with a `-`.
-
-As I write this, I realise that this will be an issue, as starting the regex with a hyphen will break the logic. This is covered more in the testing portion of the README file. Regardless, for now, the value of `i` will be `2`.
 
 The `if` statement below checks if `2` is less than `4 - 1`, which is true. This means that we must be looking at the regex, and thus, the variable `regex` inherits the value of `argv[2]`, after which `i` gets incremented by `1`.
 
@@ -701,21 +701,36 @@ Path: logs/logs.log
 ### A regex starting with a `-` being passed
 
 ```input
-❯ ./loggy -dainm "-icon" logs/logs.log
+❯ ./loggy -dainm "-.-"  logs/logs.log
 ```
 
 ```output
-Unknown option: c
+1:192.168.0.5 - - [13/Nov/2025:12:01:03 +0000] "GET /index.html HTTP/1.1" 200 5123
+2:10.0.0.14 - - [13/Nov/2025:12:01:04 +0000] "POST /login HTTP/1.1" 302 122
+3:172.16.5.44 - - [13/Nov/2025:12:01:04 +0000] "GET /dashboard HTTP/1.1" 200 9812
+4:192.168.0.5 - - [13/Nov/2025:12:01:07 +0000] "GET /images/logo.png HTTP/1.1" 200 23211
+5:203.0.113.77 - - [13/Nov/2025:12:01:09 +0000] "GET /robots.txt HTTP/1.1" 404 321
+6:10.0.0.14 - - [13/Nov/2025:12:01:10 +0000] "GET /profile HTTP/1.1" 200 1821
+7:192.168.0.8 - - [13/Nov/2025:12:01:13 +0000] "GET /settings HTTP/1.1" 403 712
+8:203.0.113.77 - - [13/Nov/2025:12:01:14 +0000] "GET /favicon.ico HTTP/1.1" 200 1321
+.
+.
+.
 ```
 
-As mentioned earlier in the documentation, this edge case needs to be resolved. Due to the logic of the program, it interprets the `-` in the regex pattern as a `-` before the flags. In this case, it recognised the `i` as a flag, but not `c`, and crashed.
+The program now correctly identifies the fact that the second hyphenin the input is part of the regex, and not the beginning of another flag. In the output the `- -` portion of the output is red. Initially, the pogram logic would break when the first character was a hyphen, but now the issue has been resolved.
 
 ```input
-./loggy -dainm "-dainm" logs/logs.log
+./loggy -dainm "-daim" logs/logs.log
 ```
 
 ```output
-Usage: ./loggy [-i] [-n] [-a] [-m] [-d] <regex> <path-to-log>
+A total of 0 matches were found for the "-daim" pattern.
+
+Debugging info:
+Flags: -i=1 -n=1 -a=1 -m=1 -d=1
+Regex: -daim
+Path: logs/logs.log
 ```
 
-If I give it a regex pattern that happens to contain characters that the flags might contain, it throws an error, as it likely assumes that the path is the regex, and then thinks that a path was not given.
+The program correctly identifies the second `-daim` string as the regex, and not flags, and thus finds no matches.
